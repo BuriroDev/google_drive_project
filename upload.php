@@ -1,24 +1,9 @@
 <?php
 session_start();
 
-// require "../includes/db.php";
-require __DIR__ . '/../google_drive_project/vendor/autoload.php';
-
-if (isset($_GET['checkAuth'])) {
-    checkAuth();
-}
-
-function checkAuth()
-{
-    $client = new Google\Client();
-    $client->setClientId('653081781599-vv88bskel1osssvntcjltnhgjvfd5kmj.apps.googleusercontent.com');
-    $client->setClientSecret('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');
-    $client->setRedirectUri('http://localhost/google_drive_project/lib/google_callback.php');
-    $client->setScopes(array('https://www.googleapis.com/auth/drive.file'));
-
-    $authUrl = $client->createAuthUrl();
-    header('Location: ' . $authUrl);
-    exit();
+if (!isset($_SESSION['upload_token'])) {
+    header("Location: index.php");
+    exit;
 }
 ?>
 
@@ -28,7 +13,7 @@ function checkAuth()
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Upload to Google Drive</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
 
@@ -52,16 +37,16 @@ function checkAuth()
         }
     </style>
 </head>
-
+ 
 <body>
-
-    <div class="container bg-success" id="main">
+    <div class="container bg-warning" id="main">
         <div>
-            <form action="upload_google.php">
-                <div class="d-flex flex-column justify-content-center align-items-center">
-                    <h3>Connect with Google Drive:</h3>
-                    <a href="./index.php?checkAuth=true" type="submit" class="btn btn-primary">Authenticate</a>
+            <form action="handle_upload.php" method="post" enctype="multipart/form-data" class="d-flex flex-column justify-content-center align-items-center">
+                <h3>Upload a File to GDrive</h3>
+                <div class="mb-3">
+                    <input class="form-control" type="file" name="file" id="formFile">
                 </div>
+                <button type="submit" class="btn btn-primary">Upload</button>
             </form>
         </div>
     </div>

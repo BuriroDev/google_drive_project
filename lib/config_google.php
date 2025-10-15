@@ -9,7 +9,7 @@ class Config
 
     const GOOGLE_ACCESS_SCOPE = 'https://www.googleapis.com/auth/drive';
 
-    const AUTHORIZED_REDIRECT_URI = 'http://localhost/Intern_Tasks/google_drive_project/lib/callback_google.php';
+    const AUTHORIZED_REDIRECT_URI = 'http://localhost/google_drive_project/lib/google_callback.php';
 
     const GOOGLE_OAUTH2_TOKEN_URI = 'https://oauth2.googleapis.com/token';
 
