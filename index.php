@@ -15,6 +15,10 @@ function checkAuth()
     $client->setClientSecret('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');
     $client->setRedirectUri('http://localhost/google_drive_project/lib/google_callback.php');
     $client->setScopes(array('https://www.googleapis.com/auth/drive.file'));
+    $client->addScope(Google\Service\Drive::DRIVE);
+    $client->setAccessType('offline');
+    $client->setPrompt('consent');
+
 
     $authUrl = $client->createAuthUrl();
     header('Location: ' . $authUrl);
