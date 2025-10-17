@@ -10,6 +10,7 @@ use Google\Service\Drive\DriveFile;
 
 if ($_SERVER['REQUEST_METHOD'] === "POST") {
     $alert = false;
+    $emptAlert = false;
 
     if (empty($_FILES["file"]["name"])) {
         echo 'Please select a file to upload.<br/>';
@@ -59,27 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['delete_id'])) {
-    $fileIdToDelete = $_GET['delete_id'];
-
-    $access_token = $_SESSION['upload_token'] ?? null;
-
-    $client = new GoogleClient();
-    $client->setClientId('653081781599-vv88bskel1osssvntcjltnhgjvfd5kmj.apps.googleusercontent.com');
-    $client->setClientSecret('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');
-    $client->addScope(Drive::DRIVE_FILE);
-    $client->setAccessToken($access_token);
-
-    $service = new Drive($client);
-
-    try {
-        $service->files->delete($fileIdToDelete);
-        echo "File with ID {$fileIdToDelete} has been deleted successfully.";
-    } catch (\Exception $e) {
-        echo 'Delete failed: ' . htmlspecialchars($e->getMessage());
-    }
-}
-
 if ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['find'])) {
 
     $access_token = $_SESSION['upload_token'] ?? null;
@@ -104,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['find'])) {
 
         if (count($response->getFiles()) > 0) {
             $file = $response->getFiles()[0];
-            echo "File ID: " . $file->getId() . "\n";
+            echo "Found file with File ID: " . $file->getId() . "\n";
         } else {
             echo "File not found.\n";
         }
@@ -112,35 +92,6 @@ if ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['find'])) {
         echo 'List failed: ' . htmlspecialchars($e->getMessage()) . "\n";
     }
 }
-
-// if ($_SERVER['REQUEST_METHOD'] === "GET" && isset($_GET['fetch'])) {
-//     $pageToken = null;
-
-//     $access_token = $_SESSION['upload_token'] ?? null;
-
-//     $client = new GoogleClient();
-//     $client->setClientId('653081781599-vv88bskel1osssvntcjltnhgjvfd5kmj.apps.googleusercontent.com');
-//     $client->setClientSecret('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');
-//     $client->addScope(Drive::DRIVE_FILE);
-//     $client->setAccessToken($access_token);
-
-//     $service = new Drive($client);
-
-//     do {
-//         $response = $service->files->listFiles([
-//             'pageSize' => 100, 
-//             'fields' => 'nextPageToken, files(id, name)',
-//             'pageToken' => $pageToken
-//         ]);
-
-//         foreach ($response->getFiles() as $file) {
-//             echo "File Name: " . $file->getName() . " | File ID: " . $file->getId() . "\n";
-//             echo "</br>";
-//         }
-
-//         $pageToken = $response->getNextPageToken();
-//     } while ($pageToken != null);
-// }
 
 if ($alert === true) {
     echo "
