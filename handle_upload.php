@@ -8,9 +8,11 @@ use Google\Client as GoogleClient;
 use Google\Service\Drive;
 use Google\Service\Drive\DriveFile;
 
-if ($_SERVER['REQUEST_METHOD'] === "POST") {
+if ($_SERVER['REQUEST_METHOD'] === "POST" && $_POST['to_folder'] === '') {
     $alert = false;
     $emptAlert = false;
+
+    echo $_POST['to_folder'];
 
     if (empty($_FILES["file"]["name"])) {
         echo 'Please select a file to upload.<br/>';
@@ -44,19 +46,49 @@ if ($_SERVER['REQUEST_METHOD'] === "POST") {
 
                 unset($_SESSION['last_file_id'], $_SESSION['google_access_token']);
                 $alert = true;
-                echo '<p>File has been uploaded to Google Drive successfully!</p>';
-
-                $fileId = $createdFile->getId();
-                $fileNameResp = $createdFile->getName();
-                $webViewLink = $createdFile->getWebViewLink() ?: 'https://drive.google.com/open?id=' . $fileId;
-
-                $statusMsg = "<p><a href=\"{$webViewLink}\" target=\"_blank\">{$fileNameResp}</a></p>";
-
-                echo $statusMsg;
             } catch (\Exception $e) {
                 echo 'Upload failed: ' . htmlspecialchars($e->getMessage());
             }
         }
+    }
+}
+
+if ($_SERVER['REQUEST_METHOD'] === "POST" && isset($_POST['to_folder'])) {
+
+    $access_token = $_SESSION['upload_token'] ?? null;
+    $client = new GoogleClient();
+    $client->addScope(Drive::DRIVE_FILE);
+    $client->setAccessToken($access_token);
+    $service = new Drive($client);
+
+    $folder_id = $_POST['to_folder'];
+
+    $targetDir = "uploads/";
+    $fileName = basename($_FILES["file"]["name"]);
+    $targetFilePath = $targetDir . $fileName;
+
+    move_uploaded_file($_FILES["file"]["tmp_name"], $targetFilePath);
+
+    $file_name = $fileName;
+    $target_file = $targetFilePath;
+    $file_content = file_get_contents($target_file);
+    $mime_type = mime_content_type($target_file);
+    $access_token = $_SESSION['upload_token'] ?? null;
+
+    try {
+        $fileMetadata = new Drive\DriveFile(array(
+            'name' => $file_name,
+            'parents' => array($folder_id)
+        ));
+        $file = $service->files->create($fileMetadata, array(
+            'data' => $file_content,
+            'mimeType' => 'image/jpeg',
+            'uploadType' => 'multipart',
+            'fields' => 'id'
+        ));
+        $alert = true;
+    } catch (Exception $e) {
+        echo "Error Message: " . $e;
     }
 }
 
